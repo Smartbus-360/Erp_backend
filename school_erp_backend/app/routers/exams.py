@@ -165,17 +165,15 @@ def create_exam_schedule(
     if not exam:
         raise HTTPException(404, "Exam not found")
 
-    # validate date range
     for item in data.schedules:
+        # validate date range
         if not (exam.start_date <= item.exam_date <= exam.end_date):
             raise HTTPException(
                 400,
                 f"Date {item.exam_date} outside exam range"
             )
 
-    # add schedule ONE BY ONE
-    for item in data.schedules:
-
+        # prevent duplicate schedule
         exists = db.query(ExamSchedule).filter(
             ExamSchedule.exam_id == exam_id,
             ExamSchedule.class_id == data.class_id,
@@ -188,7 +186,7 @@ def create_exam_schedule(
         if exists:
             raise HTTPException(
                 status_code=400,
-                detail="Schedule already exists for this subject and date"
+                detail="Schedule already exists"
             )
 
         db.add(ExamSchedule(
@@ -202,7 +200,7 @@ def create_exam_schedule(
         ))
 
     db.commit()
-    return {"message": "Exam schedule saved"}
+    return {"message": "Exam schedule added"}
 
 @router.get("/{exam_id}/schedule")
 def get_exam_schedule(
