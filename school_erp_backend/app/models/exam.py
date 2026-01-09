@@ -8,7 +8,6 @@ class Exam(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)      # Unit Test, Mid Term
-    class_id = Column(Integer, nullable=False)
     institute_id = Column(Integer, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
