@@ -224,14 +224,30 @@ def get_exam_schedule(
     db: Session = Depends(get_db),
     user=Depends(employee_permission_required("can_exams"))
 ):
-    rows = db.query(ExamSchedule).filter(
-        ExamSchedule.exam_id == exam_id,
-        ExamSchedule.class_id == class_id,
-        ExamSchedule.section_id == section_id,
-        ExamSchedule.institute_id == user.institute_id
-    ).order_by(ExamSchedule.exam_date).all()
+    schedules = (
+        db.query(ExamSchedule)
+        .join(SchoolClass, SchoolClass.id == ExamSchedule.class_id)
+        .join(Subject, Subject.id == ExamSchedule.subject_id)
+        .filter(
+            ExamSchedule.exam_id == exam_id,
+            ExamSchedule.class_id == class_id,
+            ExamSchedule.section_id == section_id,
+            ExamSchedule.institute_id == user.institute_id
+        )
+        .order_by(ExamSchedule.exam_date)
+        .all()
+    )
 
-    return rows
+    result = []
+    for s in schedules:
+        result.append({
+            "class_name": s.class_.name,      # adjust if attr name differs
+            "section_name": s.section.name,
+            "subject_name": s.subject.name,
+            "exam_date": s.exam_date.strftime("%d-%m-%Y")
+        })
+
+    return result
 @router.get("/marks")
 def get_exam_marks(
     exam_id: int,
