@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.database import Base, engine
-from app.routers import auth,institute,students,attendance,employees,attendance_reports,classes,subjects,exams,results,fees,homework,salary,promotion,dashboard,reports,students_search,sections,syllabus,fee_fine,timetable,weekday,period
+from app.routers import auth,institute,students,attendance,employees,attendance_reports,classes,subjects,exams,results,fees,homework,salary,promotion,dashboard,reports,students_search,sections,syllabus,fee_fine,timetable,weekday,period,messages,notifications,dashboard1
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="School ERP API")
@@ -42,6 +42,11 @@ app.include_router(fee_fine.router)
 app.include_router(timetable.router)
 app.include_router(weekday.router)
 app.include_router(period.router)
+app.include_router(messages.router)
+app.include_router(notifications.router)
+app.include_router(dashboard1.router)
+
+
 @app.get("/")
 def root():
     return {"status": "ERP Backend Running"}
