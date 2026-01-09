@@ -299,7 +299,7 @@ def get_exam(
     return {
         "id": exam.id,
         "name": exam.name,
-        "class_id": exam.class_id,
+        # "class_id": exam.class_id,
         "start_date": exam.start_date,
         "end_date": exam.end_date,
         # "subjects": [
