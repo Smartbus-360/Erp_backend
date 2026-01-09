@@ -98,7 +98,6 @@ def create_exam(
 
     exam = Exam(
         name=data.name,
-        # class_id=data.class_id,
         institute_id=user.institute_id,
         start_date=data.start_date,
         end_date=data.end_date
