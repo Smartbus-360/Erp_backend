@@ -354,3 +354,36 @@ def get_exam_result(
         })["marks"][r.subject] = r.marks
 
     return result
+
+
+@router.get("/{exam_id}/schedule/print")
+def print_exam_schedule(
+    exam_id: int,
+    class_id: int,
+    section_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(employee_permission_required("can_exams"))
+):
+    schedules = (
+        db.query(ExamSchedule)
+        .join(SchoolClass)
+        .join(Subject)
+        .filter(
+            ExamSchedule.exam_id == exam_id,
+            ExamSchedule.class_id == class_id,
+            ExamSchedule.section_id == section_id,
+            ExamSchedule.institute_id == user.institute_id
+        )
+        .order_by(ExamSchedule.exam_date)
+        .all()
+    )
+
+    return [
+        {
+            "class_name": s.class_.name,
+            "section_name": s.section.name,
+            "subject_name": s.subject.name,
+            "exam_date": s.exam_date.strftime("%d-%m-%Y"),
+        }
+        for s in schedules
+    ]
