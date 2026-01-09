@@ -3,10 +3,10 @@ from datetime import date
 
 class ExamCreate(BaseModel):
     name: str
-    class_id: int
+    # class_id: int
     start_date: date
     end_date: date
-    subject_ids: list[int]
+    # subject_ids: list[int]
 
 
 class ExamResponse(BaseModel):
