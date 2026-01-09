@@ -10,7 +10,6 @@ class ExamCreate(BaseModel):
 class ExamResponse(BaseModel):
     id: int
     name: str
-    class_id: int
 
     class Config:
         from_attributes = True
