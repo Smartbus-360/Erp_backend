@@ -174,12 +174,32 @@ def create_exam_schedule(
             )
 
     # remove old schedule
-    db.query(ExamSchedule).filter(
+    for item in data.schedules:
+    exists = db.query(ExamSchedule).filter(
         ExamSchedule.exam_id == exam_id,
         ExamSchedule.class_id == data.class_id,
         ExamSchedule.section_id == data.section_id,
+        ExamSchedule.subject_id == item.subject_id,
+        ExamSchedule.exam_date == item.exam_date,
         ExamSchedule.institute_id == user.institute_id
-    ).delete()
+    ).first()
+
+    if exists:
+        raise HTTPException(
+            status_code=400,
+            detail="Schedule already exists for this subject and date"
+        )
+
+    db.add(ExamSchedule(
+        exam_id=exam_id,
+        class_id=data.class_id,
+        section_id=data.section_id,
+        subject_id=item.subject_id,
+        teacher_id=item.teacher_id,
+        exam_date=item.exam_date,
+        institute_id=user.institute_id
+    ))
+
 
     # insert new schedule
     for item in data.schedules:
