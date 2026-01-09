@@ -15,3 +15,11 @@ class ExamSchedule(Base):
     exam_date = Column(Date, nullable=False)
 
     institute_id = Column(Integer, nullable=False)
+    exam = relationship("Exam")
+    class_ = relationship("SchoolClass")
+    section = relationship("Section")
+    subject = relationship("Subject")
+    teacher = relationship("Employee")
+
+
+
