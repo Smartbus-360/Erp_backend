@@ -7,6 +7,7 @@ from app.database import Base
 
 class Message(Base):
     __tablename__ = "messages"
+    __table_args__ = {"extend_existing": True}  # ✅ ADD THIS
 
     id = Column(Integer, primary_key=True, index=True)
 
