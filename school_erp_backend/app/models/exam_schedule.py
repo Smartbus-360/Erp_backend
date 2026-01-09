@@ -1,5 +1,11 @@
 from sqlalchemy import Column, Integer, String, Date,ForeignKey
 from app.database import Base
+from sqlalchemy.orm import relationship
+from app.models.exam import Exam
+from app.models.class_model import SchoolClass
+from app.models.section import Section
+from app.models.subject import Subject
+from app.models.employee import Employee
 
 class ExamSchedule(Base):
     __tablename__ = "exam_schedules"
