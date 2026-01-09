@@ -9,6 +9,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
                 "https://erp.webadmin.smartbus360.com",
+                "https://erp.backend.smartbus360.com",
         "http://127.0.0.1:8001",
         "http://localhost:8001"
     ],
