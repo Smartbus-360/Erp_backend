@@ -274,3 +274,39 @@ def get_all_exams(
     return db.query(Exam).filter(
         Exam.institute_id == user.institute_id
     ).all()
+
+@router.get("/{exam_id}/result")
+def get_exam_result(
+    exam_id: int,
+    class_id: int,
+    section_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(employee_permission_required("can_exams"))
+):
+    rows = (
+        db.query(
+            Student.id,
+            Student.name,
+            Subject.name.label("subject"),
+            ExamMark.marks
+        )
+        .join(ExamMark, ExamMark.student_id == Student.id)
+        .join(Subject, Subject.id == ExamMark.subject_id)
+        .filter(
+            ExamMark.exam_id == exam_id,
+            Student.class_id == class_id,
+            Student.section_id == section_id,
+            Student.institute_id == user.institute_id
+        )
+        .order_by(Student.roll_no)
+        .all()
+    )
+
+    result = {}
+    for r in rows:
+        result.setdefault(r.id, {
+            "student_name": r.name,
+            "marks": {}
+        })["marks"][r.subject] = r.marks
+
+    return result
