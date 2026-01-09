@@ -57,6 +57,36 @@ router = APIRouter(prefix="/exams", tags=["Exams"])
 #     db.commit()
 #     return exam
 
+# @router.post("/", response_model=ExamResponse)
+# def create_exam(
+#     data: ExamCreate,
+#     db: Session = Depends(get_db),
+#     user=Depends(admin_or_superadmin)
+# ):
+#     if data.end_date < data.start_date:
+#         raise HTTPException(400, "End date cannot be before start date")
+
+#     exam = Exam(
+#         name=data.name,
+#         # class_id=data.class_id,
+#         institute_id=user.institute_id,
+#         start_date=data.start_date,
+#         end_date=data.end_date
+#     )
+
+#     db.add(exam)
+#     db.commit()
+#     db.refresh(exam)
+
+#     for subject_id in data.subject_ids:
+#         db.add(ExamSubject(
+#             exam_id=exam.id,
+#             subject_id=subject_id
+#         ))
+
+#     db.commit()
+#     return exam
+
 @router.post("/", response_model=ExamResponse)
 def create_exam(
     data: ExamCreate,
@@ -68,7 +98,7 @@ def create_exam(
 
     exam = Exam(
         name=data.name,
-        class_id=data.class_id,
+        # class_id=data.class_id,
         institute_id=user.institute_id,
         start_date=data.start_date,
         end_date=data.end_date
@@ -78,13 +108,6 @@ def create_exam(
     db.commit()
     db.refresh(exam)
 
-    for subject_id in data.subject_ids:
-        db.add(ExamSubject(
-            exam_id=exam.id,
-            subject_id=subject_id
-        ))
-
-    db.commit()
     return exam
 
 
