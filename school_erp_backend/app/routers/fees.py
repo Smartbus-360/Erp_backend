@@ -463,3 +463,34 @@ def save_fee_structure(payload: SaveFeeStructureRequest, db: Session = Depends(g
 
     db.commit()
     return {"status": "success", "message": "Fee structure saved"}
+
+
+def calculate_fees_stats(db, institute_id, class_id=None, section=None):
+    q = db.execute("""
+        SELECT
+            COALESCE(SUM(total_amount), 0) as total,
+            COALESCE(SUM(paid_amount), 0) as paid
+        FROM fees
+        WHERE institute_id = :institute_id
+        AND (:class_id IS NULL OR class_id = :class_id)
+        AND (:section IS NULL OR section = :section)
+    """, {
+        "institute_id": institute_id,
+        "class_id": class_id,
+        "section": section
+    }).fetchone()
+
+    total = q.total or 0
+    paid = q.paid or 0
+    pending = max(total - paid, 0)
+
+    def pct(x):
+        return round((x / total) * 100, 1) if total else 0
+
+    return {
+        "total": total,
+        "paid": paid,
+        "pending": pending,
+        "paid_percent": pct(paid),
+        "pending_percent": pct(pending)
+    }
