@@ -8,7 +8,9 @@ from app.models.class_model import SchoolClass
 from app.schemas.subject_schema import (
     SubjectCreate,
     AssignSubject,
-    SubjectResponse
+    SubjectResponse,
+    SubjectTeacherItem,
+    SubjectAssignedRequest,
 )
 from app.dependencies import admin_or_superadmin
 from app.auth import get_current_user
@@ -55,7 +57,7 @@ def list_subjects(
 
 @router.post("/assign")
 def assign_subjects_to_class(
-    data: AssignSubject,
+    data: SubjectAssignRequest,
     db: Session = Depends(get_db),
     user=Depends(admin_or_superadmin)
 ):
@@ -67,29 +69,62 @@ def assign_subjects_to_class(
     if not cls:
         raise HTTPException(status_code=404, detail="Class not found")
 
-    # Clear old mappings
-    # db.query(ClassSubject).filter(
-    #     ClassSubject.class_id == data.class_id
-    # ).delete()
+    # 🔥 DELETE old assignments for this class
+    db.query(ClassSubject).filter(
+        ClassSubject.class_id == data.class_id,
+        ClassSubject.institute_id == user.institute_id
+    ).delete()
 
-    # Add new mappings (without deleting old ones)
-    for subject_id in data.subject_ids:
-        exists = db.query(ClassSubject).filter(
-            ClassSubject.class_id == data.class_id,
-            ClassSubject.subject_id == subject_id,
-            ClassSubject.institute_id == user.institute_id
-    ).first()
-
-        if not exists:
-            cs = ClassSubject(
+    # ✅ SAVE subject + teacher
+    for item in data.subjects:
+        cs = ClassSubject(
             class_id=data.class_id,
-            subject_id=subject_id,
+            subject_id=item.subject_id,
+            teacher_id=item.teacher_id,   # ⭐ THIS FIXES EVERYTHING
             institute_id=user.institute_id
         )
-            db.add(cs)
+        db.add(cs)
 
     db.commit()
     return {"message": "Subjects assigned successfully"}
+
+# @router.post("/assign")
+# def assign_subjects_to_class(
+#     data: AssignSubject,
+#     db: Session = Depends(get_db),
+#     user=Depends(admin_or_superadmin)
+# ):
+#     cls = db.query(SchoolClass).filter(
+#         SchoolClass.id == data.class_id,
+#         SchoolClass.institute_id == user.institute_id
+#     ).first()
+
+#     if not cls:
+#         raise HTTPException(status_code=404, detail="Class not found")
+
+#     # Clear old mappings
+#     # db.query(ClassSubject).filter(
+#     #     ClassSubject.class_id == data.class_id
+#     # ).delete()
+
+#     # Add new mappings (without deleting old ones)
+#     for subject_id in data.subject_ids:
+#         exists = db.query(ClassSubject).filter(
+#             ClassSubject.class_id == data.class_id,
+#             ClassSubject.subject_id == subject_id,
+#             ClassSubject.institute_id == user.institute_id
+#     ).first()
+
+#         if not exists:
+#             cs = ClassSubject(
+#             class_id=data.class_id,
+#             subject_id=subject_id,
+#             institute_id=user.institute_id
+#         )
+#             db.add(cs)
+
+#     db.commit()
+#     return {"message": "Subjects assigned successfully"}
     
 
     # Add new mappings
