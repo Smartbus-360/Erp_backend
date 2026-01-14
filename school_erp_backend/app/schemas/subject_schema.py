@@ -10,6 +10,7 @@ class AssignSubject(BaseModel):
     class_id: int
     section_id: int | None = None
     subject_ids: list[int]
+    teacher_id: int | None = None
 
 
 class SubjectResponse(BaseModel):
