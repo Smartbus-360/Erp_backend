@@ -466,7 +466,7 @@ def save_fee_structure(payload: SaveFeeStructureRequest, db: Session = Depends(g
     return {"status": "success", "message": "Fee structure saved"}
 
 
-def calculate_fees_stats(db, institute_id, class_id=None, section=None):
+def calculate_fees_stats(db, institute_id, class_id=None):
     q = db.execute(
         text("""
             SELECT
@@ -475,12 +475,10 @@ def calculate_fees_stats(db, institute_id, class_id=None, section=None):
             FROM student_fees
             WHERE institute_id = :institute_id
               AND (:class_id IS NULL OR class_id = :class_id)
-              AND (:section IS NULL OR section = :section)
         """),
         {
             "institute_id": institute_id,
-            "class_id": class_id,
-            "section": section
+            "class_id": class_id
         }
     ).fetchone()
 
