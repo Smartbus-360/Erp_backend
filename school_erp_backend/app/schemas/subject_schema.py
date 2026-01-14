@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import List, Optional
+
 
 class SubjectCreate(BaseModel):
     name: str
@@ -16,3 +18,11 @@ class SubjectResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SubjectTeacherItem(BaseModel):
+    subject_id: int
+    teacher_id: Optional[int]
+
+class SubjectAssignRequest(BaseModel):
+    class_id: int
+    subjects: List[SubjectTeacherItem]
