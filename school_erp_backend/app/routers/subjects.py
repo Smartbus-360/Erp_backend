@@ -13,6 +13,7 @@ from app.schemas.subject_schema import (
 from app.dependencies import admin_or_superadmin
 from app.auth import get_current_user
 from sqlalchemy import func
+from app.models.employee import Employee
 
 router = APIRouter(prefix="/subjects", tags=["Subjects"])
 
