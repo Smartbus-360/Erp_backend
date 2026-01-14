@@ -7,4 +7,5 @@ class ClassSubject(Base):
     id = Column(Integer, primary_key=True)
     class_id = Column(Integer, ForeignKey("classes.id"))
     subject_id = Column(Integer, ForeignKey("subjects.id"))
+    teacher_id = Column(Integer, nullable=True)
     institute_id = Column(Integer, nullable=False)
