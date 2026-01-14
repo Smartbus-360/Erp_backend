@@ -189,3 +189,34 @@ def subject_summary(
         }
         for r in rows
     ]
+
+
+@router.get("/details/{class_id}")
+def subjects_with_teachers(
+    class_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(admin_or_superadmin)
+):
+    rows = (
+        db.query(
+            Subject.id,
+            Subject.name.label("subject_name"),
+            Employee.name.label("teacher_name")
+        )
+        .join(ClassSubject, ClassSubject.subject_id == Subject.id)
+        .outerjoin(Employee, Employee.id == ClassSubject.teacher_id)
+        .filter(
+            ClassSubject.class_id == class_id,
+            ClassSubject.institute_id == user.institute_id
+        )
+        .all()
+    )
+
+    return [
+        {
+            "subject_id": r.id,
+            "subject_name": r.subject_name,
+            "teacher_name": r.teacher_name or "Not Assigned"
+        }
+        for r in rows
+    ]
