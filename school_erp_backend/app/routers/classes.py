@@ -16,7 +16,7 @@ from sqlalchemy import func , case
 from app.models.section import Section
 from app.models.student import Student
 from app.models.employee import Employee
-from app.routes.fees import calculate_fees_stats
+from app.routers.fees import calculate_fees_stats
 
 
 router = APIRouter(prefix="/classes", tags=["Classes"])
