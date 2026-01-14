@@ -45,43 +45,101 @@ def create_class(
     return cls
 
 # @router.get("/", response_model=list[ClassResponse])
+# @router.get("/")
+# def list_classes(
+#     db: Session = Depends(get_db),
+#     user=Depends(get_current_user)
+# ):
+#     if user.role == "superadmin":
+#         return db.query(SchoolClass).all()
+
+#     # return db.query(SchoolClass).filter(
+#     #     SchoolClass.institute_id == user.institute_id
+#     # ).all()
+#     q = (
+#         db.query(
+#             SchoolClass.id,
+#             SchoolClass.name,
+#             Employee.name.label("teacher_name"),
+#             func.count(func.distinct(Section.id)).label("sections_count"),
+#             func.count(func.distinct(Student.id)).label("students_count"),
+#         )
+#         .outerjoin(Employee, Employee.id == SchoolClass.class_teacher_id)
+#         .outerjoin(Section, Section.class_id == SchoolClass.id)
+#         .outerjoin(Student, Student.class_id == SchoolClass.id)
+#         .filter(SchoolClass.institute_id == user.institute_id)
+#         .group_by(SchoolClass.id, Employee.name)
+#     )
+
+#     return [
+#         {
+#         "id": c.id,
+#         "name": c.name,
+#         "teacher_name": c.teacher_name,
+#         "sections_count": c.sections_count,
+#         "students_count": c.students_count,
+#         }
+#         for c in q.all()
+#     ]
+
 @router.get("/")
 def list_classes(
     db: Session = Depends(get_db),
     user=Depends(get_current_user)
 ):
-    if user.role == "superadmin":
-        return db.query(SchoolClass).all()
+    classes = db.query(SchoolClass).filter(
+        SchoolClass.institute_id == user.institute_id
+    ).all()
 
-    # return db.query(SchoolClass).filter(
-    #     SchoolClass.institute_id == user.institute_id
-    # ).all()
-    q = (
-        db.query(
-            SchoolClass.id,
-            SchoolClass.name,
-            Employee.name.label("teacher_name"),
-            func.count(func.distinct(Section.id)).label("sections_count"),
-            func.count(func.distinct(Student.id)).label("students_count"),
-        )
-        .outerjoin(Employee, Employee.id == SchoolClass.class_teacher_id)
-        .outerjoin(Section, Section.class_id == SchoolClass.id)
-        .outerjoin(Student, Student.class_id == SchoolClass.id)
-        .filter(SchoolClass.institute_id == user.institute_id)
-        .group_by(SchoolClass.id, Employee.name)
-    )
+    result = []
 
-    return [
-        {
-        "id": c.id,
-        "name": c.name,
-        "teacher_name": c.teacher_name,
-        "sections_count": c.sections_count,
-        "students_count": c.students_count,
-        }
-        for c in q.all()
-    ]
+    for cls in classes:
+        students = db.query(Student).filter(
+            Student.class_id == cls.id
+        ).all()
 
+        total = len(students)
+        boys = sum(1 for s in students if s.gender == "male")
+        girls = sum(1 for s in students if s.gender == "female")
+
+        boys_percent = round((boys / total) * 100) if total else 0
+        girls_percent = round((girls / total) * 100) if total else 0
+
+        sections = db.query(Section).filter(
+            Section.class_id == cls.id
+        ).all()
+
+        section_data = []
+        for sec in sections:
+            sec_students = [s for s in students if s.section == sec.name]
+
+            section_data.append({
+                "name": sec.name,
+                "total": len(sec_students),
+                "boys": sum(1 for s in sec_students if s.gender == "male"),
+                "girls": sum(1 for s in sec_students if s.gender == "female"),
+            })
+
+        teacher = db.query(Employee).filter(
+            Employee.id == cls.class_teacher_id
+        ).first()
+
+        result.append({
+            "id": cls.id,
+            "name": cls.name,
+            "teacher_name": teacher.name if teacher else None,
+            "students_count": total,
+            "sections_count": len(sections),
+
+            "boys_count": boys,
+            "girls_count": girls,
+            "boys_percent": boys_percent,
+            "girls_percent": girls_percent,
+
+            "sections": section_data
+        })
+
+    return result
 
 @router.post("/sections", response_model=SectionResponse)
 def add_section(
