@@ -10,7 +10,7 @@ from app.schemas.subject_schema import (
     AssignSubject,
     SubjectResponse,
     SubjectTeacherItem,
-    SubjectAssignedRequest,
+    SubjectAssignRequest,
 )
 from app.dependencies import admin_or_superadmin
 from app.auth import get_current_user
