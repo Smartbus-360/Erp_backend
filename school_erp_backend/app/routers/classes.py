@@ -16,6 +16,8 @@ from sqlalchemy import func , case
 from app.models.section import Section
 from app.models.student import Student
 from app.models.employee import Employee
+from app.routes.fees import calculate_fees_stats
+
 
 router = APIRouter(prefix="/classes", tags=["Classes"])
 
@@ -199,6 +201,13 @@ def list_classes(
             for caste, count in caste_rows
         } if total_students else {}
 
+        fees_stats = calculate_fees_stats(
+            db=db,
+            institute_id=user.institute_id,
+            class_id=cls.id
+        )
+
+
         # 🟢 SECTIONS (SUMMARY ONLY, NO STUDENTS)
         sections = (
             db.query(Section)
@@ -235,6 +244,7 @@ def list_classes(
             "boys_percent": boys_percent,
             "girls_percent": girls_percent,
             "caste_stats": caste_stats,
+            "fees_stats": fees_stats,
             "sections": section_list,
             "sections_count": len(section_list)
         })
@@ -515,9 +525,17 @@ def section_summary(
         )
 
         caste_stats = {
-            caste: round((count / total) * 100)
+            caste: round((count / total) * 100,1)
             for caste, count in caste_rows
         } if total else {}
+
+        fees_stats = calculate_fees_stats(
+            db=db,
+            institute_id=user.institute_id,
+            class_id=class_id,
+            section=sec.name
+        )
+
 
         result.append({
             "id": sec.id,
@@ -525,7 +543,9 @@ def section_summary(
             "students_count": total,
             "boys_percent": round((boys / total) * 100) if total else 0,
             "girls_percent": round((girls / total) * 100) if total else 0,
-            "caste_stats": caste_stats
+            "caste_stats": caste_stats,
+            "fees_stats": fees_stats   # ✅ ADD THIS LINE
+
         })
 
     return result
