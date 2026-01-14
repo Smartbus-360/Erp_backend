@@ -466,19 +466,22 @@ def save_fee_structure(payload: SaveFeeStructureRequest, db: Session = Depends(g
     return {"status": "success", "message": "Fee structure saved"}
 
 
-def calculate_fees_stats(db, institute_id, class_id=None):
+def calculate_fees_stats(db, institute_id, class_id=None, section=None):
     q = db.execute(
         text("""
             SELECT
-                COALESCE(SUM(total_amount), 0) AS total,
-                COALESCE(SUM(paid_amount), 0) AS paid
-            FROM student_fees
-            WHERE institute_id = :institute_id
-              AND (:class_id IS NULL OR class_id = :class_id)
+                COALESCE(SUM(sf.total_amount), 0) AS total,
+                COALESCE(SUM(sf.paid_amount), 0) AS paid
+            FROM student_fees sf
+            JOIN students s ON s.id = sf.student_id
+            WHERE sf.institute_id = :institute_id
+              AND (:class_id IS NULL OR sf.class_id = :class_id)
+              AND (:section IS NULL OR s.section = :section)
         """),
         {
             "institute_id": institute_id,
-            "class_id": class_id
+            "class_id": class_id,
+            "section": section
         }
     ).fetchone()
 
