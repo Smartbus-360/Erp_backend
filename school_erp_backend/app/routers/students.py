@@ -524,3 +524,19 @@ def change_student_password(
     db.commit()
 
     return {"message": "Password updated successfully"}
+
+
+@router.get("/students/caste-stats")
+def caste_stats(db: Session = Depends(get_db)):
+    rows = db.execute("""
+        SELECT caste, COUNT(*) as total
+        FROM students
+        WHERE caste IS NOT NULL AND caste != ''
+        GROUP BY caste
+        ORDER BY total DESC
+    """).fetchall()
+
+    return [
+        {"label": r.caste, "count": r.total}
+        for r in rows
+    ]
