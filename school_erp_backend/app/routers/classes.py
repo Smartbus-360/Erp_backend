@@ -13,7 +13,6 @@ from app.schemas.class_schema import (
 from app.dependencies import admin_or_superadmin
 from app.auth import get_current_user
 from sqlalchemy import func , case
-from app.models.section import Section
 from app.models.student import Student
 from app.models.employee import Employee
 from app.routers.fees import calculate_fees_stats
@@ -39,7 +38,7 @@ def create_class(
     cls = SchoolClass(
         name=data.name,
         institute_id=user.institute_id,
-        class_teacher_id=data.class_teacher_id
+        class_coordinator_id=data.class_coordinator_id
     )
 
     db.add(cls)
@@ -236,11 +235,11 @@ def list_classes(
         response.append({
             "id": cls.id,
             "name": cls.name,
-            "teacher_name": (
-                db.query(Employee.name)
-                .filter(Employee.id == cls.class_teacher_id)
-                .scalar()
-            ),
+            "class_coordinator_name": (
+    db.query(Employee.name)
+    .filter(Employee.id == cls.class_coordinator_id)
+    .scalar()
+),
             "students_count": total_students,
             "boys_percent": boys_percent,
             "girls_percent": girls_percent,
@@ -277,7 +276,9 @@ def add_section(
     sec = Section(
         name=data.name,
         class_id=data.class_id,
-        institute_id=user.institute_id
+        institute_id=user.institute_id,
+        teacher_id=data.teacher_id
+
     )
 
     db.add(sec)
@@ -448,7 +449,14 @@ def get_class(class_id: int, db: Session = Depends(get_db), user=Depends(get_cur
     return {
         "id": cls.id,
         "name": cls.name,
-        "class_teacher_id": cls.class_teacher_id,
+"class_coordinator": {
+    "id": cls.class_coordinator_id,
+    "name": (
+        db.query(Employee.name)
+        .filter(Employee.id == cls.class_coordinator_id)
+        .scalar()
+    )
+},
         "sections": [{"id": s.id, "name": s.name} for s in sections],
         "monthly_fee": monthly_fee
     }
@@ -469,7 +477,7 @@ def update_class(
         raise HTTPException(status_code=404, detail="Class not found")
 
     cls.name = data.name
-    cls.class_teacher_id = data.class_teacher_id
+    cls.class_coordinator_id = data.class_coordinator_id
 
     db.commit()
     db.refresh(cls)
@@ -556,7 +564,13 @@ def section_summary(
             "boys_percent": round((boys / total) * 100) if total else 0,
             "girls_percent": round((girls / total) * 100) if total else 0,
             "caste_stats": caste_stats,
-            "fees_stats": fees_stats   # ✅ ADD THIS LINE
+            "fees_stats": fees_stats ,  # ✅ ADD THIS LINE
+            "teacher_name": (
+    db.query(Employee.name)
+    .filter(Employee.id == sec.teacher_id)
+    .scalar()
+),
+"teacher_id": sec.teacher_id
 
         })
 
