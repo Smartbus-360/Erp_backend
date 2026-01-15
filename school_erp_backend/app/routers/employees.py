@@ -247,3 +247,20 @@ def get_employee(
         "designation": employee.designation,
         "phone": employee.phone,
     }
+
+@router.get("/{employee_id}")
+def get_employee(employee_id: int, db: Session = Depends(get_db)):
+    emp = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    return {
+        "id": emp.id,
+        "name": emp.name,
+        "email": emp.email,
+        "mobile": emp.mobile,
+        "role": emp.role,
+        "designation": emp.designation,
+        "salary": emp.salary,
+        "joining_date": emp.joining_date
+    }
