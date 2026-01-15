@@ -8,7 +8,7 @@ class Section(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(10), nullable=False)   # A, B, C
     class_id = Column(Integer, ForeignKey("classes.id"))
-    class_coordinator_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    teacher_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
+    teacher = relationship("Employee")
     institute_id = Column(Integer, nullable=False)
     school_class = relationship("SchoolClass", back_populates="sections")
-    teacher = relationship("Employee")
