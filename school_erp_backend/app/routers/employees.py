@@ -240,26 +240,26 @@ def get_employee_permissions(
 
     return perm
 
-@router.get("/{employee_id}", response_model=EmployeeResponse)
-def get_employee(
-    employee_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(admin_or_superadmin)
-):
-    employee = db.query(Employee).filter(
-        Employee.id == employee_id,
-        Employee.institute_id == user.institute_id
-    ).first()
+# @router.get("/{employee_id}", response_model=EmployeeResponse)
+# def get_employee(
+#     employee_id: int,
+#     db: Session = Depends(get_db),
+#     user=Depends(admin_or_superadmin)
+# ):
+#     employee = db.query(Employee).filter(
+#         Employee.id == employee_id,
+#         Employee.institute_id == user.institute_id
+#     ).first()
 
-    if not employee:
-        raise HTTPException(status_code=404, detail="Employee not found")
+#     if not employee:
+#         raise HTTPException(status_code=404, detail="Employee not found")
 
-    return {
-        "id": employee.id,
-        "name": employee.name,
-        "designation": employee.designation,
-        "phone": employee.phone,
-    }
+#     return {
+#         "id": employee.id,
+#         "name": employee.name,
+#         "designation": employee.designation,
+#         "phone": employee.phone,
+#     }
 
 @router.get("/{employee_id}")
 def get_employee(employee_id: int, db: Session = Depends(get_db)):
@@ -306,3 +306,24 @@ def create_employee_form_field(
     db.add(field)
     db.commit()
     return {"message": "Field added"}
+
+@router.get("/{employee_id}", response_model=EmployeeResponse)
+def get_employee(
+    employee_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(admin_or_superadmin)
+):
+    employee = db.query(Employee).filter(
+        Employee.id == employee_id,
+        Employee.institute_id == user.institute_id
+    ).first()
+
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    return {
+        "id": employee.id,
+        "name": employee.name,
+        "designation": employee.designation,
+        "phone": employee.phone,
+    }
