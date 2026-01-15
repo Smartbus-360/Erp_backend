@@ -45,6 +45,13 @@ def send_message(
     current_user=Depends(get_current_user)
 ):
     sender_role = current_user.role
+    # -------- ROLE RESTRICTION --------
+    if sender_role not in ["admin", "employee"]:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not allowed to send class-based messages"
+        )
+
     if send_scope == "class":
         receiver_id = get_class_coordinator(db, class_id)
         receiver_role = "employee"
