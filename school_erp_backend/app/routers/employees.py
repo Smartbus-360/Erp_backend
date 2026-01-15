@@ -10,6 +10,10 @@ from app.dependencies import admin_or_superadmin
 from app.models.user import User
 from app.security import hash_password
 from app.schemas.employee_login import EmployeeLoginCreate
+from app.models.employee_form_field import EmployeeFormField
+from app.models.employee_extra_data import EmployeeExtraData
+from app.schemas.employee_form_field import EmployeeFormFieldCreate
+from app.dependencies import get_institute_id
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
@@ -34,6 +38,15 @@ def add_employee(
     db.add(employee)
     db.commit()
     db.refresh(employee)
+
+    if data.extra_fields:
+        for key, value in data.extra_fields.items():
+            db.add(EmployeeExtraData(
+                employee_id=employee.id,
+                field_key=key,
+                value=str(value)
+            ))
+
 
     perms = EmployeePermission(employee_id=employee.id)
     db.add(perms)
@@ -264,3 +277,33 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
         "salary": emp.salary,
         "joining_date": emp.joining_date
     }
+
+@router.get("/form-fields")
+def get_employee_form_fields(
+    db: Session = Depends(get_db),
+    institute_id: int = Depends(get_institute_id)
+):
+    return db.query(EmployeeFormField).filter(
+        EmployeeFormField.institute_id == institute_id,
+        EmployeeFormField.is_active == True
+    ).all()
+
+
+@router.post("/form-fields")
+def create_employee_form_field(
+    payload: EmployeeFormFieldCreate,
+    db: Session = Depends(get_db),
+    institute_id: int = Depends(get_institute_id),
+    user=Depends(admin_or_superadmin)
+):
+    field = EmployeeFormField(
+        institute_id=institute_id,
+        field_key=payload.field_key,
+        field_label=payload.field_label,
+        field_type=payload.field_type,
+        options=payload.options,
+        is_required=payload.is_required
+    )
+    db.add(field)
+    db.commit()
+    return {"message": "Field added"}
