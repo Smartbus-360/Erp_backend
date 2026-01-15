@@ -8,7 +8,16 @@ class SchoolClass(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False)   # e.g. "10", "LKG"
     institute_id = Column(Integer, nullable=False)
-    sections = relationship("Section", back_populates="school_class")
-    class_coordinator_id = Column(Integer, ForeignKey("employees.id"), nullable=True)
-    teacher = relationship("Employee")
-    sections = relationship("Section", back_populates="school_class")
+    class_coordinator_id = Column(
+        Integer,
+        ForeignKey("employees.id"),
+        nullable=True
+    )
+
+    class_coordinator = relationship("Employee")
+
+    sections = relationship(
+        "Section",
+        back_populates="school_class",
+        cascade="all, delete"
+    )
