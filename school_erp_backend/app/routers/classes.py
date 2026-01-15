@@ -17,6 +17,7 @@ from app.models.section import Section
 from app.models.student import Student
 from app.models.employee import Employee
 from app.routers.fees import calculate_fees_stats
+from app.models.fee_structure import FeeStructure
 
 
 router = APIRouter(prefix="/classes", tags=["Classes"])
@@ -433,12 +434,23 @@ def get_class(class_id: int, db: Session = Depends(get_db), user=Depends(get_cur
         Section.class_id == class_id
     ).all()
 
+    monthly_fee = (
+        db.query(FeeStructure.amount)
+        .filter(
+            FeeStructure.scope == "CLASS",
+            FeeStructure.class_id == class_id,
+            FeeStructure.fee_name == "Monthly Tuition Fee",
+            FeeStructure.institute_id == user.institute_id
+        )
+        .scalar()
+    )
+
     return {
         "id": cls.id,
         "name": cls.name,
         "class_teacher_id": cls.class_teacher_id,
         "sections": [{"id": s.id, "name": s.name} for s in sections],
-        "monthly_fee": None
+        "monthly_fee": monthly_fee
     }
 
 @router.put("/{class_id}")
