@@ -8,16 +8,36 @@ from app.auth import get_current_user
 from app.models.message import Message, MessageAttachment
 from app.schemas.MessageResponse import MessageResponse
 from app.utils.file_upload import save_message_file
+from app.models.class_model import Class
+from app.models.class_subject import ClassSubject
 
 router = APIRouter(prefix="/messages", tags=["Messaging"])
 
 
+def get_class_coordinator(db, class_id):
+    cls = db.query(Class).filter(Class.id == class_id).first()
+    if not cls or not cls.class_coordinator_id:
+        raise HTTPException(400, "Class coordinator not assigned")
+    return cls.class_coordinator_id
+
+def get_section_teacher(db, class_id, section):
+    subject = db.query(ClassSubject).filter(
+        ClassSubject.class_id == class_id,
+        ClassSubject.section == section
+    ).first()
+
+    if not subject or not subject.teacher_id:
+        raise HTTPException(400, "Teacher not assigned for this section")
+
+    return subject.teacher_id
+
 # ===================== SEND MESSAGE =====================
 @router.post("/send", response_model=MessageResponse)
 def send_message(
-    send_type: str = Form(...),      # student / employee / institute
+    send_scope: str = Form(...),     # "class" or "class_section"
+    class_id: int = Form(...),
+    section: Optional[str] = Form(None),
     message: str = Form(...),
-    receiver_id: Optional[int] = Form(None),
     category: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
     files: Optional[List[UploadFile]] = File(None),
@@ -25,33 +45,23 @@ def send_message(
     current_user=Depends(get_current_user)
 ):
     sender_role = current_user.role
-    print("DEBUG send_type =", send_type)
-    print("DEBUG all form data received")
+    if send_scope == "class":
+        receiver_id = get_class_coordinator(db, class_id)
+        receiver_role = "employee"
 
-    # -------- MAP send_type → receiver_role --------
-    if send_type not in ["student", "employee", "institute"]:
-        raise HTTPException(400, "Invalid send type")
+    elif send_scope == "class_section":
+        if not section:
+            raise HTTPException(400, "Section is required")
+        receiver_id = get_section_teacher(db, class_id, section)
+        receiver_role = "employee"
 
-    receiver_role = send_type
-
-    # -------- ROLE RULES --------
-    if sender_role == "admin":
-        pass  # admin can message anyone
-    elif sender_role == "employee":
-        if receiver_role != "student":
-            raise HTTPException(403, "Employees can message students only")
-    elif sender_role == "student":
-        if receiver_role != "employee":
-            raise HTTPException(403, "Students can message employees only")
-        if category != "teacher":
-            raise HTTPException(403, "Students can message teachers only")
     else:
-        raise HTTPException(403, "Invalid sender role")
+        raise HTTPException(400, "Invalid send_scope")
 
     # -------- CREATE MESSAGE --------
     new_message = Message(
         sender_id=current_user.id,
-        sender_role=sender_role,
+        sender_role=current_user.role,
         receiver_role=receiver_role,
         receiver_id=receiver_id,      # None = broadcast
         category=category,
