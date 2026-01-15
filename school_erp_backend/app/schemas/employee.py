@@ -10,7 +10,7 @@ class EmployeeCreate(BaseModel):
     education: str | None = None
     address: str | None = None
 
-    extra_fields: Optional[Dict[str, str]] = {}
+extra_fields: Optional[Dict[str, str]] = None
 
 
 class EmployeeResponse(BaseModel):
