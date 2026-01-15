@@ -9,6 +9,9 @@ class EmployeeCreate(BaseModel):
     education: str | None = None
     address: str | None = None
 
+    extra_fields: Optional[Dict[str, str]] = {}
+
+
 class EmployeeResponse(BaseModel):
     id: int
     name: str
