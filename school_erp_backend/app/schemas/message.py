@@ -9,11 +9,12 @@ class MessageCreate(BaseModel):
     receiver_role: str
     # institute / employee / student
 
-    receiver_id: Optional[int] = None
-    # null = broadcast
+    send_scope: str
+# "class" | "class_section"
 
-    category: Optional[str] = None
-    # teacher / driver / accountant etc.
+class_id: Optional[int] = None
+section: Optional[str] = None
+
 
     title: Optional[str] = None
     message: str
