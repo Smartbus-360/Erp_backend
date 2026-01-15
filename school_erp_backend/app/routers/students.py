@@ -299,6 +299,34 @@ def search_students(
         for s in students
     ]
 
+@router.get("/form-fields")
+def get_student_form_fields(
+    db: Session = Depends(get_db),
+    user = Depends(admin_or_superadmin)
+):
+    return db.query(StudentFormField).filter(
+        StudentFormField.institute_id == user.institute_id,
+        StudentFormField.is_active == True
+    ).all()
+
+@router.post("/form-fields")
+def create_student_form_field(
+    payload: StudentFormFieldCreate,
+    db: Session = Depends(get_db),
+    user = Depends(admin_or_superadmin)
+):
+    field = StudentFormField(
+        institute_id=user.institute_id,
+        field_key=payload.field_key,
+        field_label=payload.field_label,
+        field_type=payload.field_type,
+        options=payload.options,
+        is_required=payload.is_required
+    )
+    db.add(field)
+    db.commit()
+    return {"message": "Field added"}
+
 @router.get("/{student_id}", response_model=StudentDetailResponse)
 def get_student_by_id(
     student_id: int,
@@ -545,30 +573,3 @@ def caste_stats(db: Session = Depends(get_db)):
         for r in rows
     ]
 
-@router.get("/form-fields")
-def get_student_form_fields(
-    db: Session = Depends(get_db),
-    user = Depends(admin_or_superadmin)
-):
-    return db.query(StudentFormField).filter(
-        StudentFormField.institute_id == user.institute_id,
-        StudentFormField.is_active == True
-    ).all()
-
-@router.post("/form-fields")
-def create_student_form_field(
-    payload: StudentFormFieldCreate,
-    db: Session = Depends(get_db),
-    user = Depends(admin_or_superadmin)
-):
-    field = StudentFormField(
-        institute_id=user.institute_id,
-        field_key=payload.field_key,
-        field_label=payload.field_label,
-        field_type=payload.field_type,
-        options=payload.options,
-        is_required=payload.is_required
-    )
-    db.add(field)
-    db.commit()
-    return {"message": "Field added"}
