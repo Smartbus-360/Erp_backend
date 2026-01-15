@@ -2,12 +2,14 @@ from pydantic import BaseModel
 
 class ClassCreate(BaseModel):
     name: str
-    class_teacher_id:int | None=None
+    class_coordinator_id: int | None = None
 
 
 class SectionCreate(BaseModel):
     name: str
     class_id: int
+    teacher_id: int | None = None
+
 
 
 class ClassResponse(BaseModel):
