@@ -281,10 +281,10 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
 @router.get("/form-fields")
 def get_employee_form_fields(
     db: Session = Depends(get_db),
-    institute_id: int = Depends(get_institute_id)
+    user = Depends(admin_or_superadmin)
 ):
     return db.query(EmployeeFormField).filter(
-        EmployeeFormField.institute_id == institute_id,
+        EmployeeFormField.institute_id == user.institute_id,
         EmployeeFormField.is_active == True
     ).all()
 
@@ -294,10 +294,10 @@ def create_employee_form_field(
     payload: EmployeeFormFieldCreate,
     db: Session = Depends(get_db),
     institute_id: int = Depends(get_institute_id),
-    user=Depends(admin_or_superadmin)
+    user = Depends(admin_or_superadmin)
 ):
     field = EmployeeFormField(
-        institute_id=institute_id,
+        institute_id=user.institute_id,
         field_key=payload.field_key,
         field_label=payload.field_label,
         field_type=payload.field_type,
