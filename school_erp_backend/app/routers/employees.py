@@ -12,7 +12,7 @@ from app.security import hash_password
 from app.schemas.employee_login import EmployeeLoginCreate
 from app.models.employee_form_field import EmployeeFormField
 from app.models.employee_extra_data import EmployeeExtraData
-from app.schemas.employee_form_field import EmployeeFormFieldCreate
+from app.schemas.employee_form_schema import EmployeeFormFieldCreate
 # from app.dependencies import get_institute_id
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
