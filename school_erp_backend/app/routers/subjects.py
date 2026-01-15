@@ -235,9 +235,11 @@ def subjects_with_teachers(
 ):
     rows = (
         db.query(
-            Subject.id,
+            Subject.id.label("subject_id"),
             Subject.name.label("subject_name"),
+            Employee.id.label("teacher_id"),
             Employee.name.label("teacher_name")
+
         )
         .join(ClassSubject, ClassSubject.subject_id == Subject.id)
         .outerjoin(Employee, Employee.id == ClassSubject.teacher_id)
@@ -250,8 +252,9 @@ def subjects_with_teachers(
 
     return [
         {
-            "subject_id": r.id,
+            "subject_id": r.subject_id,
             "subject_name": r.subject_name,
+            "teacher_id": r.teacher_id,
             "teacher_name": r.teacher_name or "Not Assigned"
         }
         for r in rows
