@@ -293,7 +293,6 @@ def get_employee_form_fields(
 def create_employee_form_field(
     payload: EmployeeFormFieldCreate,
     db: Session = Depends(get_db),
-    institute_id: int = Depends(get_institute_id),
     user = Depends(admin_or_superadmin)
 ):
     field = EmployeeFormField(
