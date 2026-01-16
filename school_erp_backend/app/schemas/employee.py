@@ -3,8 +3,7 @@ from typing import Optional, Dict
 
 class EmployeeCreate(BaseModel):
     name: str
-    # designation: str | None = None
-    role_id: int                    # ✅ NEW (required)
+    designation: str | None = None
     phone: str | None = None
     gender: str | None = None
     religion: str | None = None
@@ -17,8 +16,8 @@ extra_fields: Optional[Dict[str, str]] = None
 class EmployeeResponse(BaseModel):
     id: int
     name: str
-    role_id: int
-    role_name: str | None = None         phone: str | None
+    designation: str | None
+    phone: str | None
 
     class Config:
         from_attributes = True
@@ -27,8 +26,7 @@ class EmployeeResponse(BaseModel):
 class EmployeeCreateResponse(BaseModel):
     id: int
     name: str
-    role_id: int
-    role_name: str | None = None
+    designation: str | None
     phone: str | None
 
     class Config:
@@ -45,8 +43,7 @@ class PermissionUpdate(BaseModel):
 class EmployeeListResponse(BaseModel):
     id: int
     name: str
-    role_id: int
-    role_name: str | None = None
+    designation: str | None
     phone: str | None
     has_login: bool
     login_email: str | None
