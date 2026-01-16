@@ -92,7 +92,7 @@ def send_message(
     class_id: Optional[int] = Form(None),
     section: Optional[str] = Form(None),
     admission_no: Optional[str] = Form(None),
-    role: Optional[str] = Form(None),
+    role_id: Optional[int] = Form(None),
     message: str = Form(...),
     category: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
@@ -118,7 +118,7 @@ def send_message(
     if send_scope == "student_admission" and not admission_no:
         raise HTTPException(400, "admission number required")
 
-    if send_scope == "employees_by_role" and not role:
+    if send_scope == "employees_by_role" and not role_id:
         raise HTTPException(400, "employee role required")
 
 
@@ -170,7 +170,7 @@ def send_message(
             raise HTTPException(400, "Employee role required")
         receiver_role = "employee"
         receiver_id = None
-        category = role
+        category = f"role:{role_id}"
 
     elif send_scope == "all_employees":
         receiver_role = "employee"
@@ -232,12 +232,14 @@ def inbox(
 
     # category-based delivery (teachers)
     if current_user.role == "employee":
-        q = q.filter(
-            or_(
-                Message.category == None,
-                Message.category == current_user.designation
-            )
+    q = q.filter(
+        or_(
+            Message.category == None,
+            Message.category == current_user.role
         )
+    )
+
+
 
     return q.order_by(Message.created_at.desc()).all()
 
