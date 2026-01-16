@@ -89,7 +89,7 @@ def get_employees_by_role(db, role, institute_id):
 @router.post("/send", response_model=MessageResponse)
 def send_message(
     send_scope: str = Form(...),     # "class" or "class_section"
-    class_id: int = Form(...),
+    class_id: Optional[int] = Form(None),
     section: Optional[str] = Form(None),
     admission_no: Optional[str] = Form(None),
     role: Optional[str] = Form(None),
@@ -107,6 +107,20 @@ def send_message(
             status_code=403,
             detail="You are not allowed to send class-based messages"
         )
+    # -------- VALIDATION PER SCOPE --------
+    if send_scope in ["class", "class_section", "class_students"]:
+        if not class_id:
+            raise HTTPException(400, "class_id required")
+
+    if send_scope == "class_section" and not section:
+        raise HTTPException(400, "section required")
+
+    if send_scope == "student_admission" and not admission_no:
+        raise HTTPException(400, "admission number required")
+
+    if send_scope == "employees_by_role" and not role:
+        raise HTTPException(400, "employee role required")
+
 
     # if send_scope == "class":
     #     receiver_id = get_class_coordinator(db, class_id)
