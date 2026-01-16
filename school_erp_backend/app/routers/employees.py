@@ -14,6 +14,11 @@ from app.models.employee_form_field import EmployeeFormField
 from app.models.employee_extra_data import EmployeeExtraData
 from app.schemas.employee_form_schema import EmployeeFormFieldCreate
 # from app.dependencies import get_institute_id
+from app.models.employee_role import EmployeeRole
+from app.schemas.employee_role_schema import (
+    EmployeeRoleCreate,
+    EmployeeRoleResponse
+)
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
@@ -335,9 +340,33 @@ def list_roles(db: Session = Depends(get_db), user=Depends(admin_or_superadmin))
         EmployeeRole.institute_id == user.institute_id,
         EmployeeRole.is_active == True
     ).all()
-@router.post("/roles")
-def create_role(name: str, db: Session = Depends(get_db), user=Depends(admin_or_superadmin)):
-    role = EmployeeRole(name=name, institute_id=user.institute_id)
+@router.post("/roles", response_model=EmployeeRoleResponse)
+def create_role(
+    data: EmployeeRoleCreate,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    if user.role != "admin":
+        raise HTTPException(403, "Only admin can add roles")
+
+    name = data.name.strip()
+
+    exists = db.query(EmployeeRole).filter(
+        EmployeeRole.name.ilike(name)
+    ).first()
+
+    if exists:
+        raise HTTPException(400, "Role already exists")
+
+    role = EmployeeRole(name=name)
     db.add(role)
     db.commit()
-    return {"message": "Role created"}
+    db.refresh(role)
+
+    return role
+
+@router.get("/roles", response_model=list[EmployeeRoleResponse])
+def get_roles(db: Session = Depends(get_db)):
+    return db.query(EmployeeRole).filter(
+        EmployeeRole.is_active == True
+    ).all()
