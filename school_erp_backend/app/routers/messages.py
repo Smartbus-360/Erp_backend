@@ -92,7 +92,7 @@ def send_message(
     class_id: Optional[int] = Form(None),
     section: Optional[str] = Form(None),
     admission_no: Optional[str] = Form(None),
-    role_id: Optional[int] = Form(None),
+    role: Optional[int] = Form(None),
     message: str = Form(...),
     category: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
@@ -118,7 +118,7 @@ def send_message(
     if send_scope == "student_admission" and not admission_no:
         raise HTTPException(400, "admission number required")
 
-    if send_scope == "employees_by_role" and not role_id:
+    if send_scope == "employees_by_role" and not role:
         raise HTTPException(400, "employee role required")
 
 
