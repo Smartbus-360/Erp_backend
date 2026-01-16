@@ -9,7 +9,7 @@ from app.models.message import Message, MessageAttachment
 from app.schemas.MessageResponse import MessageResponse
 from app.utils.file_upload import save_message_file
 from app.models.class_model import SchoolClass
-from app.models.class_subject import ClassSubject
+from app.models.section import Section
 
 router = APIRouter(prefix="/messages", tags=["Messaging"])
 
@@ -33,16 +33,16 @@ def get_class_coordinator(db: Session, class_id: int):
     return cls.class_coordinator_id
 
 
-def get_section_teacher(db, class_id, section):
-    subject = db.query(ClassSubject).filter(
-        ClassSubject.class_id == class_id,
-        ClassSubject.section == section
+def get_section_teacher(db: Session, class_id: int, section_name: str):
+    sec = db.query(Section).filter(
+        Section.class_id == class_id,
+        Section.name == section_name
     ).first()
 
-    if not subject or not subject.teacher_id:
+    if not sec or not sec.teacher_id:
         raise HTTPException(400, "Teacher not assigned for this section")
 
-    return subject.teacher_id
+    return sec.teacher_id
 
 # ===================== SEND MESSAGE =====================
 @router.post("/send", response_model=MessageResponse)
