@@ -8,6 +8,5 @@ class EmployeeRole(Base):
     institute_id = Column(Integer, nullable=False)
 
     name = Column(String(100), nullable=False)   # Teacher, Driver, Librarian
-    slug = Column(String(100), nullable=False)   # teacher, driver, librarian
 
     is_active = Column(Boolean, default=True)
