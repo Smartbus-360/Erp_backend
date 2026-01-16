@@ -328,3 +328,16 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
         "salary": emp.salary,
         "joining_date": emp.joining_date
     }
+
+@router.get("/roles")
+def list_roles(db: Session = Depends(get_db), user=Depends(admin_or_superadmin)):
+    return db.query(EmployeeRole).filter(
+        EmployeeRole.institute_id == user.institute_id,
+        EmployeeRole.is_active == True
+    ).all()
+@router.post("/roles")
+def create_role(name: str, db: Session = Depends(get_db), user=Depends(admin_or_superadmin)):
+    role = EmployeeRole(name=name, institute_id=user.institute_id)
+    db.add(role)
+    db.commit()
+    return {"message": "Role created"}
