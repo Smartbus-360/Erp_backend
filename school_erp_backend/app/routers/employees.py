@@ -266,6 +266,45 @@ def get_employee_permissions(
 #         "phone": employee.phone,
 #     }
 
+@router.get("/roles", response_model=list[EmployeeRoleResponse])
+def get_roles(db: Session = Depends(get_db)):
+    return db.query(EmployeeRole).filter(
+        EmployeeRole.is_active == True
+    ).all()
+
+@router.get("/roles")
+def list_roles(db: Session = Depends(get_db), user=Depends(admin_or_superadmin)):
+    return db.query(EmployeeRole).filter(
+        EmployeeRole.institute_id == user.institute_id,
+        EmployeeRole.is_active == True
+    ).all()
+@router.post("/roles", response_model=EmployeeRoleResponse)
+def create_role(
+    data: EmployeeRoleCreate,
+    db: Session = Depends(get_db),
+    user=Depends(admin_or_superadmin)
+):
+    name = data.name.strip()
+
+    exists = db.query(EmployeeRole).filter(
+        EmployeeRole.name.ilike(name),
+        EmployeeRole.institute_id == user.institute_id
+    ).first()
+
+    if exists:
+        raise HTTPException(400, "Role already exists")
+
+    role = EmployeeRole(
+        name=name,
+        institute_id=user.institute_id,
+        is_active=True
+    )
+
+    db.add(role)
+    db.commit()
+    db.refresh(role)
+
+    return role
 
 @router.get("/form-fields")
 def get_employee_form_fields(
@@ -334,42 +373,3 @@ def get_employee(employee_id: int, db: Session = Depends(get_db)):
         "joining_date": emp.joining_date
     }
 
-@router.get("/roles")
-def list_roles(db: Session = Depends(get_db), user=Depends(admin_or_superadmin)):
-    return db.query(EmployeeRole).filter(
-        EmployeeRole.institute_id == user.institute_id,
-        EmployeeRole.is_active == True
-    ).all()
-@router.post("/roles", response_model=EmployeeRoleResponse)
-def create_role(
-    data: EmployeeRoleCreate,
-    db: Session = Depends(get_db),
-    user=Depends(admin_or_superadmin)
-):
-    name = data.name.strip()
-
-    exists = db.query(EmployeeRole).filter(
-        EmployeeRole.name.ilike(name),
-        EmployeeRole.institute_id == user.institute_id
-    ).first()
-
-    if exists:
-        raise HTTPException(400, "Role already exists")
-
-    role = EmployeeRole(
-        name=name,
-        institute_id=user.institute_id,
-        is_active=True
-    )
-
-    db.add(role)
-    db.commit()
-    db.refresh(role)
-
-    return role
-
-@router.get("/roles", response_model=list[EmployeeRoleResponse])
-def get_roles(db: Session = Depends(get_db)):
-    return db.query(EmployeeRole).filter(
-        EmployeeRole.is_active == True
-    ).all()
