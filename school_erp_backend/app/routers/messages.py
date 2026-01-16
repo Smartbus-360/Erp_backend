@@ -170,7 +170,7 @@ def send_message(
             raise HTTPException(400, "Employee role required")
         receiver_role = "employee"
         receiver_id = None
-        category = f"role:{role_id}"
+        category = f"role:{role}"
 
     elif send_scope == "all_employees":
         receiver_role = "employee"
@@ -232,10 +232,11 @@ def inbox(
 
     # category-based delivery (teachers)
     if current_user.role == "employee":
-    q = q.filter(
-        or_(
-            Message.category == None,
-            Message.category == current_user.role
+        q = q.filter(
+            or_(
+                Message.category == None,
+                Message.category == current_user.employee.designation,
+
         )
     )
 
