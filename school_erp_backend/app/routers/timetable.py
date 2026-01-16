@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List, Optional
 
 from app.database import get_db
 from app.models.timetable import Timetable
@@ -290,3 +291,4 @@ def export_class_timetable_pdf(
             "attachment; filename=timetable.pdf"
         }
     )
+
