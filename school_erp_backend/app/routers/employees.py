@@ -344,21 +344,24 @@ def list_roles(db: Session = Depends(get_db), user=Depends(admin_or_superadmin))
 def create_role(
     data: EmployeeRoleCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    user=Depends(admin_or_superadmin)
 ):
-    if user.role != "admin":
-        raise HTTPException(403, "Only admin can add roles")
-
     name = data.name.strip()
 
     exists = db.query(EmployeeRole).filter(
-        EmployeeRole.name.ilike(name)
+        EmployeeRole.name.ilike(name),
+        EmployeeRole.institute_id == user.institute_id
     ).first()
 
     if exists:
         raise HTTPException(400, "Role already exists")
 
-    role = EmployeeRole(name=name)
+    role = EmployeeRole(
+        name=name,
+        institute_id=user.institute_id,
+        is_active=True
+    )
+
     db.add(role)
     db.commit()
     db.refresh(role)
