@@ -25,7 +25,7 @@ def add_employee(
 ):
     employee = Employee(
     name=data.name,
-    designation=data.designation,
+    role_id=data.role_id,
     phone=data.phone,
     gender=data.gender,
     education=data.education,
