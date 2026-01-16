@@ -8,7 +8,7 @@ from app.auth import get_current_user
 from app.models.message import Message, MessageAttachment
 from app.schemas.MessageResponse import MessageResponse
 from app.utils.file_upload import save_message_file
-from app.models.class_model import Class
+from app.models.class_model import SchoolClass
 from app.models.class_subject import ClassSubject
 
 router = APIRouter(prefix="/messages", tags=["Messaging"])
