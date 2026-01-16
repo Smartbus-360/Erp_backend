@@ -173,9 +173,9 @@ def send_message(
         category = role
 
     elif send_scope == "all_employees":
-    receiver_role = "employee"
-    receiver_id = None
-    category = "all_employees"
+        receiver_role = "employee"
+        receiver_id = None
+        category = "all_employees"
 
     else:
         raise HTTPException(400, "Invalid send_scope")
