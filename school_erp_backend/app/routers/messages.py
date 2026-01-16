@@ -91,6 +91,8 @@ def send_message(
     send_scope: str = Form(...),     # "class" or "class_section"
     class_id: int = Form(...),
     section: Optional[str] = Form(None),
+    admission_no: Optional[str] = Form(None),
+    role: Optional[str] = Form(None),
     message: str = Form(...),
     category: Optional[str] = Form(None),
     title: Optional[str] = Form(None),
@@ -126,6 +128,8 @@ def send_message(
         receiver_role = "employee"
 
     elif send_scope == "class_section":
+        if not section:
+            raise HTTPException(400, "Section required")
         receiver_id = get_section_teacher(db, class_id, section)
         receiver_role = "employee"
 
@@ -135,7 +139,8 @@ def send_message(
         category = f"class:{class_id}"
 
     elif send_scope == "student_admission":
-        admission_no = Form(...)
+        if not admission_no:
+            raise HTTPException(400, "Admission number required")
         receiver_id = get_student_by_admission(
             db, admission_no, current_user.institute_id
         )
@@ -147,7 +152,8 @@ def send_message(
         category = "all_students"
 
     elif send_scope == "employees_by_role":
-        role = Form(...)
+        if not role:
+            raise HTTPException(400, "Employee role required")
         receiver_role = "employee"
         receiver_id = None
         category = role
