@@ -14,11 +14,24 @@ from app.models.class_subject import ClassSubject
 router = APIRouter(prefix="/messages", tags=["Messaging"])
 
 
-def get_class_coordinator(db, class_id):
-    cls = db.query(Class).filter(Class.id == class_id).first()
-    if not cls or not cls.class_coordinator_id:
-        raise HTTPException(400, "Class coordinator not assigned")
+def get_class_coordinator(db: Session, class_id: int):
+    cls = (
+        db.query(SchoolClass)
+        .filter(SchoolClass.id == class_id)
+        .first()
+    )
+
+    if not cls:
+        raise HTTPException(status_code=404, detail="Class not found")
+
+    if not cls.class_coordinator_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Class coordinator not assigned"
+        )
+
     return cls.class_coordinator_id
+
 
 def get_section_teacher(db, class_id, section):
     subject = db.query(ClassSubject).filter(
