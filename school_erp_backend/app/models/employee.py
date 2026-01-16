@@ -8,7 +8,7 @@ class Employee(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     name = Column(String(150), nullable=False)
-    role_id = Column(Integer, ForeignKey("employee_roles.id"), nullable=False)
+    designation = Column(String(100), nullable=True)
     phone = Column(String(20), nullable=True)
 
     gender = Column(String(20), nullable=True)
