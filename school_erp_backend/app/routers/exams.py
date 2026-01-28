@@ -315,9 +315,23 @@ def get_all_exams(
     db: Session = Depends(get_db),
     user=Depends(employee_permission_required("can_exams"))
 ):
-    return db.query(Exam).filter(
-        Exam.institute_id == user.institute_id
+    # return db.query(Exam).filter(
+    #     Exam.institute_id == user.institute_id
+    # ).all()
+    exams = db.query(Exam).filter(
+    Exam.institute_id == user.institute_id
     ).all()
+
+    return [
+        {
+        "id": e.id,
+        "name": e.name,
+        "start_date": e.start_date,
+        "end_date": e.end_date
+        }
+        for e in exams
+    ]
+
 
 @router.get("/{exam_id}/result")
 def get_exam_result(
