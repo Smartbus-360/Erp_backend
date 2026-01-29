@@ -403,7 +403,9 @@ def get_students_by_class_section(
     )
 
     if section_id:
-        q = q.filter(Student.section == section_id)
+        # q = q.filter(Student.section == section_id)
+        q = q.filter(Student.section_id == section_id)
+
 
     students = q.all()
 
