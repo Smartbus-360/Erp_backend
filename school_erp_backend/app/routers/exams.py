@@ -390,7 +390,6 @@ def get_student_exams(
         db.query(Exam)
         .filter(
             Exam.institute_id == user.institute_id,
-            Exam.class_id == student.class_id
         )
         .order_by(Exam.start_date)
         .all()
