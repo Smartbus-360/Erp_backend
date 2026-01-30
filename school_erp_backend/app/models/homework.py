@@ -7,7 +7,7 @@ class Homework(Base):
     id = Column(Integer, primary_key=True)
 
     class_id = Column(Integer, nullable=False)
-    section = Column(String(10), nullable=True)
+    section_id = Column(String(10), nullable=True)
     subject_id = Column(Integer, nullable=False)
     teacher_id = Column(Integer, nullable=True)
 
