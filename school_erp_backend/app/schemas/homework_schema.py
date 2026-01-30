@@ -5,8 +5,8 @@ from typing import List, Optional
 class HomeworkCreate(BaseModel):
     class_id: int
     # section: str | None = None
-    section_id = Column(Integer, nullable=True)   # ✅ ADD IF MISSING
-    subject_id: int
+section_id: Optional[int] = None
+subject_id: int
     teacher_id: Optional[int] = None   
     title: str
     description: str
