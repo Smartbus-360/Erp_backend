@@ -16,7 +16,7 @@ subject_id: int
 class HomeworkResponse(BaseModel):
     id: int
     class_id: int
-    section: str | None
+    section: int | None
     subject_id: int
     teacher_id: int | None
 
