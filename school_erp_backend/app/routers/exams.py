@@ -369,4 +369,103 @@ def get_exam_result(
 
     return result
 
+@router.get("/student/my-exams")
+def get_student_exams(
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    if user.role != "student":
+        raise HTTPException(status_code=403)
+
+    student = db.query(Student).filter(
+        Student.user_id == user.id,
+        Student.institute_id == user.institute_id
+    ).first()
+
+    if not student:
+        raise HTTPException(404, "Student not found")
+
+    exams = (
+        db.query(Exam)
+        .filter(
+            Exam.institute_id == user.institute_id,
+            Exam.class_id == student.class_id
+        )
+        .order_by(Exam.start_date)
+        .all()
+    )
+
+    return exams
+@router.get("/student/exams/{exam_id}/schedule")
+def get_student_exam_schedule(
+    exam_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    if user.role != "student":
+        raise HTTPException(status_code=403)
+
+    student = db.query(Student).filter(
+        Student.user_id == user.id,
+        Student.institute_id == user.institute_id
+    ).first()
+
+    if not student:
+        raise HTTPException(404)
+
+    schedules = (
+        db.query(ExamSchedule)
+        .join(Subject)
+        .filter(
+            ExamSchedule.exam_id == exam_id,
+            ExamSchedule.class_id == student.class_id,
+            ExamSchedule.section_id == student.section_id,
+            ExamSchedule.institute_id == user.institute_id
+        )
+        .order_by(ExamSchedule.exam_date)
+        .all()
+    )
+
+    return [
+        {
+            "subject": s.subject.name,
+            "date": s.exam_date.strftime("%d-%m-%Y")
+        }
+        for s in schedules
+    ]
+@router.get("/student/exams/{exam_id}/result")
+def get_student_exam_result(
+    exam_id: int,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user)
+):
+    if user.role != "student":
+        raise HTTPException(status_code=403)
+
+    student = db.query(Student).filter(
+        Student.user_id == user.id,
+        Student.institute_id == user.institute_id
+    ).first()
+
+    if not student:
+        raise HTTPException(404)
+
+    rows = (
+        db.query(
+            Subject.name.label("subject"),
+            ExamMark.marks
+        )
+        .join(Subject, Subject.id == ExamMark.subject_id)
+        .filter(
+            ExamMark.exam_id == exam_id,
+            ExamMark.student_id == student.id
+        )
+        .all()
+    )
+
+    return {
+        "exam_id": exam_id,
+        "student": student.name,
+        "marks": {r.subject: r.marks for r in rows}
+    }
 
