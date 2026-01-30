@@ -19,6 +19,7 @@ from app.schemas.exam_schedule_schema import(
 from app.dependencies import admin_or_superadmin, employee_permission_required
 from app.models.exam_schedule import ExamSchedule
 from app.models.subject import Subject
+from app.auth import get_current_user
 
 router = APIRouter(prefix="/exams", tags=["Exams"])
 
