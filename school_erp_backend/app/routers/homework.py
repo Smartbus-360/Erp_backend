@@ -93,13 +93,64 @@ def add_homework(
 
 #     return result
 
+# @router.get("/")
+# def list_homework(
+#     homework_date: Optional[date] = None,
+#     class_id: Optional[int] = None,
+#     teacher_id: Optional[int] = None,
+#     db: Session = Depends(get_db),
+# user=Depends(admin_or_superadmin)
+# ):
+#     q = db.query(
+#         Homework,
+#         SchoolClass.name.label("class_name"),
+#         Subject.name.label("subject_name"),
+#         Employee.name.label("teacher_name")
+#     ).join(
+#         SchoolClass, SchoolClass.id == Homework.class_id
+#     ).join(
+#         Subject, Subject.id == Homework.subject_id
+#     ).outerjoin(   # ✅ IMPORTANT CHANGE
+#         Employee, Employee.id == Homework.teacher_id
+#     ).filter(
+#         Homework.institute_id == user.institute_id
+#     )
+
+#     if homework_date:
+#         q = q.filter(Homework.due_date == homework_date)
+
+#     if class_id:
+#         q = q.filter(Homework.class_id == class_id)
+
+#     if teacher_id:
+#         q = q.filter(Homework.teacher_id == teacher_id)
+
+#     result = []
+#     for hw, class_name, subject_name, teacher_name in q.all():
+#         result.append({
+#             "id": hw.id,
+#             "class_id": hw.class_id,
+#             "class_name": class_name,
+#             "subject_id": hw.subject_id,
+#             "subject_name": subject_name,
+#             "teacher_id": hw.teacher_id,
+#             "teacher_name": teacher_name or "Admin",  # ✅ fallback
+#             "title": hw.title,
+#             "description": hw.description,
+#             "due_date": hw.due_date
+#         })
+
+#     return result
+
+
 @router.get("/")
 def list_homework(
     homework_date: Optional[date] = None,
     class_id: Optional[int] = None,
-    teacher_id: Optional[int] = None,
+    section_id: Optional[int] = None,     # ✅ ADD
+    subject_id: Optional[int] = None,     # ✅ ADD
     db: Session = Depends(get_db),
-user=Depends(admin_or_superadmin)
+    user=Depends(admin_or_superadmin)
 ):
     q = db.query(
         Homework,
@@ -110,7 +161,7 @@ user=Depends(admin_or_superadmin)
         SchoolClass, SchoolClass.id == Homework.class_id
     ).join(
         Subject, Subject.id == Homework.subject_id
-    ).outerjoin(   # ✅ IMPORTANT CHANGE
+    ).outerjoin(
         Employee, Employee.id == Homework.teacher_id
     ).filter(
         Homework.institute_id == user.institute_id
@@ -122,8 +173,11 @@ user=Depends(admin_or_superadmin)
     if class_id:
         q = q.filter(Homework.class_id == class_id)
 
-    if teacher_id:
-        q = q.filter(Homework.teacher_id == teacher_id)
+    if section_id:
+        q = q.filter(Homework.section_id == section_id)
+
+    if subject_id:
+        q = q.filter(Homework.subject_id == subject_id)
 
     result = []
     for hw, class_name, subject_name, teacher_name in q.all():
@@ -133,11 +187,10 @@ user=Depends(admin_or_superadmin)
             "class_name": class_name,
             "subject_id": hw.subject_id,
             "subject_name": subject_name,
-            "teacher_id": hw.teacher_id,
-            "teacher_name": teacher_name or "Admin",  # ✅ fallback
+            "teacher_name": teacher_name or "Admin",
             "title": hw.title,
             "description": hw.description,
-            "due_date": hw.due_date
+            "assigned_date": hw.due_date,   # ✅ STANDARDIZE NAME
         })
 
     return result
